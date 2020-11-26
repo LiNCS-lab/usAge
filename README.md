@@ -3,7 +3,7 @@ This project consist in a series of modules used to extract measures from transc
 
 The following figure presents the pipeline architecture of this measure extraction tool.
 
-![image](assets/pipeline.jpeg)
+![image](assets/pipeline.jpg)
 
 ## Table of Contents
 1. [Installation](#Installation)
