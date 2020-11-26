@@ -1,0 +1,10 @@
+.vscode
+*.code-workspace
+/out
+/build
+/dist
+/cfg
+*.DS_STORE
+*.pyc
+*.pyo
+/data
