@@ -18,7 +18,6 @@ Here's a list of the calculated metrics:
 Tool parameters
 ----------
 corpus_path: path to the folder containing TAGGED transcriptions (MUST contain only transcription files)
-language: specify language of the transcriptions to be processed. (e.g.: en_CA, fr_CA, etc.)"
 features_output_path (optionnal): file path for the extracted measures in a .csv file (e.g.: out/pos-distribution-measures.csv
 verbose (optionnal): for debugging purpose
 
@@ -39,10 +38,11 @@ import os
 import sys
 from collections import Counter
 
-import enchant
 import pandas as pd
+from spellchecker import SpellChecker
 
-from utils.corpus_util import extract_freeling_tags, obtain_corpus_classes, extract_participant_info
+from utils.corpus_util import (extract_freeling_tags, extract_participant_info,
+                               obtain_corpus_classes)
 from utils.data_util import export_dataframe
 from utils.nlp_util import Tag
 from utils.pickle_util import read_pickle
@@ -53,12 +53,13 @@ LINGUISTIC_FEATURES_EXPORT_PATH = "out/ExtractedFeatures/linguistic_features.csv
 LINGUISTIC_FEATURES = ["idParticipant", "interviewNumber", "text_size", "vocab_size", "hapax_legomena", "hapax_dislegomena", 
                 "brunet_index", "honore_r_statistics", "ttr", "sichel_s", "yule_k", "entropy", "status"]
 
+# Create spell checker (Supports English, Spanish, German, French, and Portuguese)
+spell = SpellChecker()
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Multilingual pos distribution calculator.')
     parser.add_argument(dest='corpus_path',
                     help='path to the folder containing all normalized transcripts')
-    parser.add_argument(dest='language', default="en_CA",
-                    help='specify language of the transcriptions used by the Enchant Python tool. Available languages : ' + str(enchant.list_languages()) + ". More can be installed via Homebrew.")
     parser.add_argument('-f', '--features_output_path', dest='features_output_path',
                     help='path to folder where normalizing features will be stored (.csv file)')
     parser.add_argument('-v', '--verbose', dest='is_verbose', default=False, action='store_true',
@@ -82,7 +83,7 @@ def main():
         print("------------------------")
         print(corpus_classes)
 
-    linguistic_matrix = process_corpus(args.corpus_path, args.language, args.is_verbose)
+    linguistic_matrix = process_corpus(args.corpus_path, args.is_verbose)
 
     df_linguistic_results = pd.DataFrame(linguistic_matrix, columns=LINGUISTIC_FEATURES)
     
@@ -91,14 +92,13 @@ def main():
     output_path = args.features_output_path if args.features_output_path else LINGUISTIC_FEATURES_EXPORT_PATH
     export_dataframe(df_linguistic_results, output_path)
 
-def process_corpus(corpus_path, language, is_verbose=False):
+def process_corpus(corpus_path, is_verbose=False):
     """
     This is the main function that processes given transcriptions corpus to calculate linguistic measures.
 
     Parameters
     ----------
     corpus_path: path to a folder containing all TAGGED transcriptions.
-    language: language of the processed corpus (e.g.: en_CA, en_US, fr_CA, etc.)
     is_verbose: boolean value to print processing info to console
 
     Returns
@@ -124,19 +124,18 @@ def process_corpus(corpus_path, language, is_verbose=False):
 
             linguistics_matrix.append((participant_info["idParticipant"],) 
                                         + (participant_info["interviewNumber"],)
-                                        + estimate_linguistics(cleaned_tags, language) 
+                                        + estimate_linguistics(cleaned_tags) 
                                         + (participant_info["status"],))
 
     return linguistics_matrix
 
-def estimate_linguistics(cleaned_tags, language):
+def estimate_linguistics(cleaned_tags):
     """
     This function estimates linguistic metrics of a transcription's POS tags. (Refer to the files documentation for information on those metrics)
 
     Parameters
     ----------
     cleaned_tags: POS tags to process
-    language: language of the processed corpus (e.g.: en_CA, en_US, fr_CA, etc.)
 
     Returns
     ----------
@@ -144,8 +143,6 @@ def estimate_linguistics(cleaned_tags, language):
     """
 
     linguistics_features = []
-    
-    d = enchant.Dict(language)
     
     ## Hyper-Parameters
     # Used for Brunet's W Index (Brunet, 1978). 0.172 is the original value proposed by Brunet
@@ -167,7 +164,7 @@ def estimate_linguistics(cleaned_tags, language):
     lemmas = []
     
     for tag in cleaned_tags:
-        if type(tag) is Tag and d.check(tag.original):
+        if type(tag) is Tag and spell.known([tag.original]):
             ## TEXTSIZE
             text_size += 1
             

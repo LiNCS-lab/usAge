@@ -3,6 +3,8 @@ This project consist in a series of modules used to extract measures from transc
 
 The following figure presents the pipeline architecture of this measure extraction tool.
 
+**Current language support : English, Spanish, German, French, and Portuguese** 
+
 ![image](assets/pipeline.jpg)
 
 ## Table of Contents
@@ -29,39 +31,13 @@ The following figure presents the pipeline architecture of this measure extracti
 ## Installation
 In order to run this tool you will need to install python.
 
-### MacOS
-#### Using Anaconda (Recommended)
+### Using Anaconda
 1. [Install Anaconda](https://docs.anaconda.com/anaconda/install/)
-2. In terminal, create conda environment and activate it :  
+2. Create environment & install dependencies :  
+3. Activate environment :  
 ```
-conda create --name <env_name>
-source activate <env_name>
-conda install pip
-```
-#### Using Homebrew
-
-```
-brew install python
-python --version
-```
-### Windows
-
-#### Using Anaconda (Recommended)
-1. [Install Anaconda](https://docs.anaconda.com/anaconda/install/)
-2. In commandline, create conda environment and activate it :  
-```
-conda create --name <env_name>
-activate <env_name>
-conda install pip
-```
-
-#### Using Python Download
-Go to [Python download page for Windows](https://www.python.org/downloads/windows/)
-
-### Librairies & dependencies
-Make sure to install librairies & dependencies with pip.
-```
-pip install -r requirements.txt
+conda env create -n usAge -f usAge.yml
+conda activate usAge
 ```
 ---
 
@@ -85,13 +61,14 @@ python src/pseudonymise-participants.py data/transcripts/ -v
 ```
 ```
 python src/multilingual-text-normalizer.py data/transcripts/ 
-                                           -s cfg/en/synonym_en.cfg 
-                                           -i cfg/en/interjection_en.cfg 
-                                           -e cfg/en/expression_en.cfg
+                                           -s cfg-examples/en/synonym_en.cfg 
+                                           -i cfg-examples/en/interjection_en.cfg 
+                                           -e cfg-examples/en/expression_en.cfg
 ```
 ```
 python src/multilingual-pos-tagger.py out/CleanedDialogs/PAR/SynonymReduced
-                                      cfg/en/freeling-en.cfg
+                                      cfg-examples/en/freeling-en.cfg
+                                      -u cfg-examples/universal_tagset-ES.map
 ```
 ```
 python src/english-pos-adjustment.py out/TaggedDialogs/PAR/
@@ -101,7 +78,6 @@ python src/multilingual-pos-distribution.py out/TaggedDialogsAdjusted/PAR/
 ```
 ```
 python src/multilingual-linguistic-measures.py out/TaggedDialogsAdjusted/PAR/
-                                               en_CA
 ```
 ```
 python src/multilingual-phonetic-measures.py data/audios/
@@ -285,7 +261,7 @@ File path to the FreeLing configuration. It is necessary in order to run FreeLin
 `--universal_map_path (-u)`  
 File path for the universal mapping. It is used to universalize POS tags in order to bring them to a more simplified and language independant form. If this flag is not specified, no universalization will be done on the tags.  
 
-There's a default map file in the **cfg/** folder but you may create your own mapping file. Here's the following format of the configuration **.txt** file :
+There's a default map file in the **cfg-examples/** folder but you may create your own mapping file. The default mapping file supports **French, English, Spanish and Portuguese** at the moment. Here's the following format of the configuration **.txt** file :
 
 ```
 POS_tag_1 Universal_tag_1
@@ -361,6 +337,8 @@ Prints debug output in console.
 ### multilingual-linguistic-measures
 ---
 The multilingual linguistic measures tool calculates linguistic metrics of a POS tagged transcript.
+
+Note : This module supports only **English, Spanish, German, French, and Portuguese**, because it is limited by its usage of the library [PySpellChecker](https://pypi.org/project/pyspellchecker/).
 
 Here's an example on how to run the linguistic measures tool :
 
