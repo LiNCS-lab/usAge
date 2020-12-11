@@ -10,7 +10,8 @@ The following figure presents the pipeline architecture of this measure extracti
 
 ## Table of Contents
 1. [Installation](#Installation)
-    1. [Using Anaconda](#using-anaconda)
+    1. [Using Anaconda (Recommended)](#using-anaconda-(Recommended))
+    2. [Using pip](#using-pip)
 2. [Data preparation](#data-preparation) 
 3. [How to use](#how-to-use)
     1. [TLDR](#TLDR)
@@ -27,7 +28,7 @@ The following figure presents the pipeline architecture of this measure extracti
 ## Installation
 In order to run this tool you will need to install python.
 
-### Using Anaconda
+### Using Anaconda (Recommended)
 1. [Install Anaconda](https://docs.anaconda.com/anaconda/install/)
 2. Create environment & install dependencies :  
 ```
@@ -37,6 +38,24 @@ conda env create -n usAge -f usAge.yml
 ```
 conda activate usAge
 ```
+### Using pip
+1. [Install pip](https://pip.pypa.io/en/stable/installing/)
+2. Install virtualenv
+```
+pip install virtualenv
+```
+3. Create environment & activate :  
+```
+virtualenv usAgeVenv
+source usAge/bin/activate # MAC
+usAge\scripts\activate # Windows
+```
+4. Install dependencies :  
+```
+pip install -r requirements.txt
+```
+---
+
 ---
 
 ## Data preparation

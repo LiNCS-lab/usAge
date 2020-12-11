@@ -1,12 +1,9 @@
 certifi==2020.11.8
-cffi @ file:///opt/concourse/worker/volumes/live/64b956eb-aec4-45ac-7ba6-1644ab7bdbb3/volume/cffi_1605538064078/work
 click==7.1.2
-cryptography @ file:///opt/concourse/worker/volumes/live/bc2022d3-cdaa-4db0-43e5-e869c08e31ac/volume/cryptography_1605544469626/work
 joblib==0.17.0
 nltk==3.5
 numpy==1.19.4
 pandas==1.1.4
-pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
 pydub==0.23.1
 pyspellchecker==0.5.5
 python-dateutil==2.8.1
@@ -14,5 +11,4 @@ python-speech-features==0.6
 pytz==2020.4
 regex==2020.11.13
 scipy==1.5.4
-six @ file:///opt/concourse/worker/volumes/live/34b5b2b5-c9cb-44fb-4b8e-8a9a881bfa35/volume/six_1605205329242/work
 tqdm==4.53.0
