@@ -34,9 +34,11 @@ In order to run this tool you will need to install python.
 ### Using Anaconda
 1. [Install Anaconda](https://docs.anaconda.com/anaconda/install/)
 2. Create environment & install dependencies :  
-3. Activate environment :  
 ```
 conda env create -n usAge -f usAge.yml
+```
+3. Activate environment :  
+```
 conda activate usAge
 ```
 ---
