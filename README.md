@@ -5,16 +5,12 @@ The following figure presents the pipeline architecture of this measure extracti
 
 **Current language support : English, Spanish, German, French, and Portuguese** 
 
-![image](assets/pipeline.jpg)
+
+<img src="assets/pipeline.jpg" width="460">
 
 ## Table of Contents
 1. [Installation](#Installation)
-    1. [MacOS](#macos)
-        1. [Using Anaconda (Recommended)](#using-anaconda-recommended---macos)
-        2. [Using Homebrew](#using-homebrew)
-    2. [Windows](#windows)
-        1. [Using Anaconda (Recommended)](#using-anaconda-recommended---windows)
-        2. [Using Python Download](#using-python-download)
+    1. [Using Anaconda](#using-anaconda)
 2. [Data preparation](#data-preparation) 
 3. [How to use](#how-to-use)
     1. [TLDR](#TLDR)
