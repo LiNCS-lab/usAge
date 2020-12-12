@@ -26,7 +26,10 @@ The following figure presents the pipeline architecture of this measure extracti
 ---
 
 ## Installation
-In order to run this tool you will need to install python.
+
+### prerequisites
+- Python
+- [FreeLink 4.0]()
 
 ### Using Anaconda (Recommended)
 1. [Install Anaconda](https://docs.anaconda.com/anaconda/install/)
@@ -46,7 +49,7 @@ pip install virtualenv
 ```
 3. Create environment & activate :  
 ```
-virtualenv usAgeVenv
+virtualenv usAge
 source usAge/bin/activate # MAC
 usAge\scripts\activate # Windows
 ```
@@ -78,9 +81,9 @@ python src/pseudonymise-participants.py data/transcripts/ -v
 ```
 ```
 python src/multilingual-text-normalizer.py data/transcripts/ 
-                                           -s cfg-examples/en/synonym_en.cfg 
-                                           -i cfg-examples/en/interjection_en.cfg 
-                                           -e cfg-examples/en/expression_en.cfg
+                                           -s cfg-examples/en/synonymes_CTP_en.cfg 
+                                           -i cfg-examples/en/interjections_en.cfg 
+                                           -e cfg-examples/en/expressions_en.cfg
 ```
 ```
 python src/multilingual-pos-tagger.py out/CleanedDialogs/PAR/SynonymReduced

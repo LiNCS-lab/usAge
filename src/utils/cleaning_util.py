@@ -1,5 +1,6 @@
 import re
 import os
+import json
 
 # This function removes pauses from dialogs.
 # Pauses should be marked as following : 
@@ -236,27 +237,24 @@ def normalize_sentence(dialog):
 
     return (clean)
 
-# This function is used to reduce synonyms to one single word. This helps reduce sparcity in a dialog.
+# This function is used to reduce synonyms to one single word. This task is mainly to reduce complexity of POS tags when analyzing 
+# basic syntaxic patterns. 
+# NOTE : We also keep track of non- synonym reduced transcripts, since valuable information can be found within synonyms.
+#
 # A configuration file should define rules for reducing synonyms.
-# Here's an example of a configuration file. All words below '[women]' will be changed for 'women':
-# [women]
-# girl
-# mother
-# wife
+# Here's an example of a configuration file. All words assigned to the word 'women' will be changed for 'women':
+# {
+#   "women": ["girl", "mother", "wife"]
+# }
 def reduce_synonyms(dialog, syn_conf_file):
     clean_syn = dialog
     nb_synonyms = 0
 
-    if os.path.exists(syn_conf_file or ""):
-        lines = open(syn_conf_file, "r")
-        curr_synonym = ""
-        for line in lines:
-            line = line.rstrip("\n\r")
-            if line.strip():
-                if line.startswith("["):
-                    curr_synonym = line[1:-1]
-                else:
-                    nb_synonyms += len(re.findall(r"\b[" + line[0].upper() + line[0].lower() + r"]" + line[1:] + r"\b", clean_syn))
-                    clean_syn = re.sub(r"\b[" + line[0].upper() + line[0].lower() + r"]" + line[1:] + r"\b", curr_synonym, clean_syn)
+    synonym_dict = json.load(open(syn_conf_file))
+
+    for curr_synonym in synonym_dict.keys():
+        pattern = r"\b("+'|'.join(synonym_dict[curr_synonym])+r")\b"
+        nb_synonyms += len(re.findall(pattern, clean_syn, re.IGNORECASE))
+        clean_syn = re.sub(pattern, curr_synonym, clean_syn, re.IGNORECASE)
     
     return (clean_syn, nb_synonyms)

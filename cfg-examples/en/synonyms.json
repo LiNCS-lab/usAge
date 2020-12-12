@@ -1,0 +1,22 @@
+{
+    "girl": ["little girl", "young girl", "little sister", "sister", "daughter", "female child", "schoolgirl", "school girl"],
+    "girlfriend": ["girl-friend"],
+    "woman": ["mother", "lady", "mama", "mom", "mamma", "mommy", "momma"],
+    "boy": ["little boy", "young boy", "little brother", "brother", "son", "schoolboy", "school boy", "lad", "little guy", "little man", "little kid", "tad", "kid"],
+    "the boy is": ["he's"],
+    "children": ["kids", "siblings"],
+    "the children": ["they"],
+    "stool": ["tripod stool", "stepstool", "three legged stool", "step-stool"],
+    "the dishes": ["a dish", "a plate", "plate"],
+    "garden": ["yard", "backyard", "back yard"],
+    "water is": ["sink’s", "faucet’s", "sink is", "faucet is"],
+    "wiping": ["washing", "drying", "washes", "dries"],
+    "wiping the dishes": ["doing the dishes", "does the dishes"],
+    "runs": ["pours"],
+    "running": ["pourring"],
+    "overflowing": ["running over", "running out over", "running down over"],
+    "overflows": ["runs over", "runs out over", "runs down over"],
+    "stealing": ["reaching", "taking"],
+    "dishwasher": ["dish-washer"],
+    "counter": ["counter-top"]
+}
