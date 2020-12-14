@@ -169,7 +169,7 @@ def estimate_phonetics(dialog_audio_path):
 
 def print_results(results):
     print("")
-    print("PHONETIC MEASURES RESULTS (Avg.)")
+    print("PHONETIC MEASURES RESULTS (Average per transcription)")
     print("------------------------")
     print(results.drop('idParticipant', 1).drop('interviewNumber', 1).drop('status', 1).astype(float).mean())
 

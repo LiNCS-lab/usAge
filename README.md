@@ -1,7 +1,7 @@
 # usAge
 This project consist in a series of modules used to extract measures from transcripts and audios of a given corpus. It is meant to be use for clinical evaluation and monitoring of patients but could eventually be used in a wider variety of applications as it is language and context independant in most parts of the pipeline.
 
-The following figure presents the pipeline architecture of this measure extraction tool.
+The following figure presents the pipeline architecture of this measure extraction tool. Blue rectangles represents multilingual modules which can be easily configured for different languages.
 
 **Current language support : English, Spanish, German, French, and Portuguese** 
 
@@ -57,7 +57,6 @@ usAge\scripts\activate # Windows
 ```
 pip install -r requirements.txt
 ```
----
 
 ---
 
@@ -81,23 +80,21 @@ python src/pseudonymise-participants.py data/transcripts/ -v
 ```
 ```
 python src/multilingual-text-normalizer.py data/transcripts/ 
-                                           -s cfg-examples/en/synonymes_CTP_en.cfg 
-                                           -i cfg-examples/en/interjections_en.cfg 
-                                           -e cfg-examples/en/expressions_en.cfg
+                                           -s cfg-examples/en/synonyms.json 
+                                           -i cfg-examples/en/interjections.cfg 
+                                           -e cfg-examples/en/expressions.cfg
 ```
 ```
-python src/multilingual-pos-tagger.py out/CleanedDialogs/PAR/SynonymReduced
-                                      cfg-examples/en/freeling-en.cfg
-                                      -u cfg-examples/universal_tagset-ES.map
+python src/multilingual-pos-tagger.py out/CleanedDialogs/PAR/SynonymReduced -u
 ```
 ```
-python src/english-pos-adjustment.py out/TaggedDialogs/PAR/
+python src/english-pos-adjustment.py out/TaggedDialogs/
 ```
 ```
-python src/multilingual-pos-distribution.py out/TaggedDialogsAdjusted/PAR/
+python src/multilingual-pos-distribution.py out/TaggedDialogsAdjusted/
 ```
 ```
-python src/multilingual-linguistic-measures.py out/TaggedDialogsAdjusted/PAR/
+python src/multilingual-linguistic-measures.py out/TaggedDialogsAdjusted/
 ```
 ```
 python src/multilingual-phonetic-measures.py data/audios/
@@ -176,31 +173,21 @@ File path to the directory where the corpus is stored. The directory should only
 **Optional Flags**
 
 `--synonyms_conf_path (-s)`  
-File path for synonym reducing task.
+File path for synonym reducing task (JSON format).
 
 The file content should be in the following format in a **text** file :  
 ```
-[reduced_synonym]      
-synonym_1
-synonym_2
-synonym_3
-...
+{
+    "reduced_synonym_1": ["synonym_1", "synonym_2", "synonym_3"],      
+    "reduced_synonym_2": ["synonym_4", "synonym_5", "synonym_6"]
+}
 ```
 *Example :*   
 ```
-[girl]
-little girl
-young girl
-sister
-little sister
-young sister
-
-[boy]
-little boy
-young boy
-brother
-little brother
-little sister
+{
+    "girl": ["little girl", "young girl", "sister", "little sister", "young sister"],
+    "boy": ["little boy", "young boy", "brother", "little brother"]
+}
 ```
 
 `--interjections_conf_path (-i)`  
@@ -247,18 +234,18 @@ Prints debug output in console.
 
 ### multilingual-pos-tagger
 ---
-The multilingual POS tagger uses [FreeLing 4.0](https://freeling-user-manual.readthedocs.io/en/v4.0/installation/) to tag transcripts. If the universal mapping file is specified, most of POS tags will be converted to it's universal form. (**English, Spanish & French** tags are supported at the moment)
+The multilingual POS tagger uses [SpaCy](https://spacy.io/usage/linguistic-features) to tag transcripts. If the universal tag flag is specified, a [universal mapping](https://spacy.io/api/annotation) of POS tag will be used.
+
+Supported languages: **Chinese, Danish, Dutch, English, French, German, Greek, Italian, Japanese, Lithuanian, Norwegian Bokmål, Polish, Portuguese, Romanian & Spanish**
 
 **NOTICE**
 
-FreeLing 4.0 must be installed on your computer and set as an environment variable path in order to work as it calls the `analyze` command.
+Depending on which language you choose, you **must** donwload the language model before running this module. See [more](https://spacy.io/usage/models).
 
 Here's an example on how to run the POS tagger tool :
 
 ```
-python src/multilingual-pos-tagger.py <corpus_path>
-                                       <freeling_config_path>
-                                       -u <universal_map_path>
+python src/multilingual-pos-tagger.py <corpus_path> en -u
 ```
 
 It will create an output folder with all the tagged data. Here's the output folder structure :
@@ -273,34 +260,22 @@ It will create an output folder with all the tagged data. Here's the output fold
 File path to the directory where the corpus is stored. The directory should only contain transcripts with the following format:  
 - .txt
 
-`freeling_config_path`  
-File path to the FreeLing configuration. It is necessary in order to run FreeLing tool for POS tagging. Normally, a configuration file is defined for each languages.
+`language_code`  
+Language code that specifies which language to use to analyze transcriptions.
+Supported language codes: **zh, da, nl, en, fr, de, el, it, ja, lt, nb, pl, pt, ro, es**
 
 **Optional Flags**
 
-`--universal_map_path (-u)`  
-File path for the universal mapping. It is used to universalize POS tags in order to bring them to a more simplified and language independant form. If this flag is not specified, no universalization will be done on the tags.  
+`--universal_tag (-u)`  
+Specifies if the POS tagger should use universal POS tags or more complexe POS tags (including morphological definition). See [more](https://spacy.io/api/annotation/).
 
-There's a default map file in the **cfg-examples/** folder but you may create your own mapping file. The default mapping file supports **French, English, Spanish and Portuguese** at the moment. Here's the following format of the configuration **.txt** file :
-
-```
-POS_tag_1 Universal_tag_1
-POS_tag_2 Universal_tag_2
-...
-```
-*Example :*  
-```
-ao0fs0	ADJ
-vag0000	AUX_VERB
-...
-```
 
 `--verbose (-v)`  
 Prints debug output in console.
 
 ### pos-adjustment
 ---
-POS tags adjustment is the only process that isn't multilingual. It is part of an incremental work as it can be adjusted to any language and/or context. It helps fix FreeLing tagging errors or adjust/simplify some tags as desired. For now, we implemented the **English** and **French** POS tag adjusment for the Cookie Theft Picture description task.
+POS tags adjustment is the only process that isn't multilingual. It is part of an incremental work as it can be adjusted to any language and/or context. It helps fix spaCy's tagging errors or adjust/simplify some tags as desired. For now, we implemented the **English** and **French** POS tag adjusment for the Cookie Theft Picture description task.
 
 Here's an example on how to run the POS tagger tool :
 
@@ -330,14 +305,10 @@ Prints debug output in console.
 ---
 The multilingual POS distribution tool calculates measures of **frequencies** and **ratios** of POS tags.
 
-**NOTICE**
-
-POS tags should be universalized beforehand.
-
-Here's an example on how to run the POS tagger tool :
+Here's an example on how to run the POS distribution tool :
 
 ```
-python src/multilingual-pos-tagger.py <corpus_path>
+python src/multilingual-pos-distribution.py <corpus_path>
 ```
 
 **Arguments**
@@ -364,7 +335,6 @@ Here's an example on how to run the linguistic measures tool :
 
 ```
 python src/multilingual-linguistic-measures.py <corpus_path>
-                                                en_CA
 ```
 
 **Arguments**
@@ -372,10 +342,6 @@ python src/multilingual-linguistic-measures.py <corpus_path>
 `corpus_path`  
 File path to the directory where the **tagged & adjusted** corpus is stored. The directory should only contain transcripts with the following format:  
 - .txt
-
-`language`  
-The language of the transcription you want to process, as it uses a dictionnary to evaluate words existence. Find the supported languages [here](https://abiword.github.io/enchant/).
-(e.g.: en_CA, fr_CA, etc.)
 
 **Optional Flags**
 
@@ -530,24 +496,16 @@ Normalizing sentences will apply a capital letter at the begenning of the senten
 
 ### multilingual-pos-tagger
 ---
-This tool calls FreeLing `analyze` tool to annotate transcription's words with POS tags.
-
-Optionnaly, you can universalize POS tags by passing a universalize mapping file.
+This tool calls spaCy's POS tagger to annotate transcription's words with POS tags based on the specified language.
+You can also decide if you want universal POS tags or more complex POS tags.
 
 ### pos-adjustment
 ---
-This tool is adapted to language and/or context. It is used to fix FreeLing tags or adjust some tags as desired.
+This tool is adapted to language and/or context. It is used to fix spaCy's tags or adjust some tags as desired.
 
 ### multilingual-pos-distribution
 ---
-This tool evaluates the following POS tags **frequency** and **ratio** in transcripts :
-
-- ADJ
-- CONJ
-- NOUN
-- ADP
-- VERB
-- AUX_VERB
+This tool evaluates POS tags **frequency** and **ratio** in transcripts
 
 ### multilingual-lingustic-measures
 ---

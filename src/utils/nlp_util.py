@@ -18,14 +18,21 @@ used classes for NLP applications.
 class UniversalPOS:
     # POS Universal tags
     ADJ_TAG = "ADJ"
-    CONJ_TAG = "CONJ"
-    NOUN_TAG = "NOUN"
     ADP_TAG = "ADP"
-    VERB_TAG = "VERB"
-    AUX_VERB_TAG = "AUX_VERB"
-    PRON_TAG = "PRON"
+    ADV_TAG = "ADV"
+    AUX_TAG = "AUX"
+    CONJ_TAG = "CONJ"
+    CCONJ_TAG = "CCONJ"
     DET_TAG = "DET"
-    PONCTUATION_TAG = "."
+    INTJ_TAG = "INTJ"
+    NOUN_TAG = "NOUN"
+    NUM_TAG = "NUM"
+    PART_TAG = "PART"
+    PRON_TAG = "PRON"
+    PUNCT_TAG = "PUNCT"
+    SCONJ_TAG = "SCONJ"
+    VERB_TAG = "VERB"
+    UNIVERSAL_TAGSET = [ADJ_TAG, ADP_TAG, ADV_TAG, AUX_TAG, CONJ_TAG, CCONJ_TAG, DET_TAG, INTJ_TAG, NOUN_TAG, NUM_TAG, PART_TAG, PRON_TAG, PUNCT_TAG, SCONJ_TAG, VERB_TAG]
 
     def __init__(self, universal_map_file):
         self.universal_map = {}
@@ -48,14 +55,13 @@ class UniversalPOS:
 class Tag:
     """
     A tag object will be composed of four elements:
-    The original word, the lemma, the tag, and the tag certainty (probability; if available).
+    The original word, the lemma, the tag.
     """
-    def __init__(self, original="", lemma="", tag="", certainty=-1):
+    def __init__(self, original="", lemma="", tag=""):
         """Initializes the data."""
         self.original = original
         self.lemma = lemma
         self.tag = tag
-        self.certainty = certainty
 
 
 class Parse:

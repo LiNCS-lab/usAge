@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-The :mod:`src.english-pos-adjustment` implements an english FreeLing POS tag adjustment task.
-It is used to modify some tags that might have been wrongfully tagged by FreeLing 
+The :mod:`src.english-pos-adjustment` implements an english POS tag adjustment task.
+It is used to modify some tags that might have been wrongfully tagged by spaCy 
 or to arrange some tags as desired for a specific context.
 
 This is an incremental process which can be modified as desired.
@@ -29,26 +29,26 @@ import os
 import re
 import sys
 
-from utils.corpus_util import extract_freeling_tags, obtain_corpus_classes, extract_participant_info
+from utils.corpus_util import extract_tags, obtain_corpus_classes, extract_participant_info
 from utils.data_util import save_tags_in_file
 from utils.nlp_util import Tag
 from utils.pickle_util import read_pickle
 from utils.nlp_util import UniversalPOS
 
 # CONSTANTS
-ADJUSTED_DIALOG_OUTPUT_PATH = "out/TaggedDialogsAdjusted/PAR/"
+ADJUSTED_DIALOG_OUTPUT_PATH = "out/TaggedDialogsAdjusted/"
 
 class Results:
     compose_count: int = 0
     conj_count: int = 0
     tag_reduction_count: int = 0
     looks_like_count: int = 0
-    aux_verb_count: int = 0
+    aux_count: int = 0
     
 def parse_args():
     parser = argparse.ArgumentParser(description='Multilingual pos distribution calculator.')
     parser.add_argument(dest='corpus_path', 
-                    help='path to the folder containing all transcripts tagged by FreeLing')
+                    help='path to the folder containing all transcripts with POS tags')
     parser.add_argument('-v', '--verbose', dest='is_verbose', default=False, action='store_true',
                     help='print processing info')
     return parser.parse_args()
@@ -103,9 +103,9 @@ def process_corpus(corpus_path, is_verbose=False):
 
             participant_info = extract_participant_info(file_name)
 
-            freeling_tags = extract_freeling_tags(os.path.join(corpus_path, file_name))
+            tags = extract_tags(os.path.join(corpus_path, file_name))
 
-            adjusted_dialog_tags, results = adjust_pos_tags(freeling_tags, results, is_verbose=is_verbose)
+            adjusted_dialog_tags, results = adjust_pos_tags(tags, results, is_verbose=is_verbose)
 
             export_file_path = ADJUSTED_DIALOG_OUTPUT_PATH + file_name
             save_tags_in_file(adjusted_dialog_tags, export_file_path)
@@ -114,7 +114,7 @@ def process_corpus(corpus_path, is_verbose=False):
 
 def adjust_pos_tags(pos_tags, results, is_verbose=False):
     """
-    This function adjust POS tags made by FreeLing.
+    This function adjust POS tags made by spaCy.
 
     Parameters
     ----------
@@ -144,7 +144,7 @@ def adjust_pos_tags(pos_tags, results, is_verbose=False):
         #adjusted_sentence, results.conj_count = resolve_conjunctions(adjusted_sentence, results.conj_count)
         #adjusted_sentence, results.tag_reduction_count = recude_tags(adjusted_sentence, results.tag_reduction_count)
         adjusted_sentence, results.looks_like_count = extract_looks_like(adjusted_sentence, results.looks_like_count)
-        adjusted_sentence, results.aux_verb_count = identify_auxiliary_verbs(adjusted_sentence, results.aux_verb_count)
+        adjusted_sentence, results.aux_count = identify_auxiliary_verbs(adjusted_sentence, results.aux_count)
 
         adjusted_pos_tags.extend(adjusted_sentence)
         adjusted_pos_tags.append("\n")
@@ -153,7 +153,7 @@ def adjust_pos_tags(pos_tags, results, is_verbose=False):
 
 def compose_tagging(current_sentence, adjustment_count):
     """
-    This function compose POS tags made by FreeLing.
+    This function compose POS tags made by spaCy.
 
     Parameters
     ----------
@@ -181,7 +181,7 @@ def compose_tagging(current_sentence, adjustment_count):
         if(current_tag.tag == UniversalPOS.VERB_TAG and current_tag.original == "\'re" and current_tag.lemma == "\'re"):
             # For those cases in which the verb "be"
             # in the form "'re" is not lemmatized as "be"
-            adjusted_tag = Tag(current_tag.original, "be", current_tag.tag, current_tag.certainty)
+            adjusted_tag = Tag(current_tag.original, "be", current_tag.tag)
             adjustment_count += 1
         
         if(be_pos_flag):
@@ -189,7 +189,7 @@ def compose_tagging(current_sentence, adjustment_count):
             # Example: "while/IN woman/NN 's/POS walking/NN with/IN ..."
             # Should be: "while/IN woman/NN 's/POS walking/VBG with/IN ..."
             if(current_tag.original.endswith("ing") and current_tag.tag != UniversalPOS.VERB_TAG):
-                adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.VERB_TAG, current_tag.certainty)
+                adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.VERB_TAG)
                 adjustment_count += 1
 
             if(current_tag.lemma != "throat"):
@@ -198,7 +198,7 @@ def compose_tagging(current_sentence, adjustment_count):
         if(current_tag.tag == UniversalPOS.ADP_TAG and current_tag.original == "\'s" and current_tag.lemma == "\'s"):
             # For those cases in which the verb "be" in the form "'s" was tagged
             # as "POS" -possesive adposition- (vast majority of 's/POS mentions in DementiaBank)
-            adjusted_tag = Tag(current_tag.original, "be", UniversalPOS.VERB_TAG, current_tag.certainty)
+            adjusted_tag = Tag(current_tag.original, "be", UniversalPOS.VERB_TAG)
             be_pos_flag = True
             adjustment_count += 1
 
@@ -305,7 +305,7 @@ def recude_tags(current_sentence, adjustment_count):
         # Edit the last tuple, so that the lemma is "be/adjective":
         if pos_tag.tag == UniversalPOS.ADJ_TAG and previous_tag == UniversalPOS.VERB_TAG:
             if adjusted_sentence[-1].lemma == "be":
-                adjusted_pos_tag = Tag(adjusted_sentence[-1].original, adjusted_sentence[-1].lemma+"+" + pos_tag.lemma, adjusted_sentence[-1].tag, adjusted_sentence[-1].certainty)
+                adjusted_pos_tag = Tag(adjusted_sentence[-1].original, adjusted_sentence[-1].lemma+"+" + pos_tag.lemma, adjusted_sentence[-1].tag)
                 del adjusted_sentence[-1]
                 adjusted_sentence.append(adjusted_pos_tag)
                 previous_tag = adjusted_pos_tag.tag
@@ -463,7 +463,7 @@ def extract_looks_like(current_sentence, adjustment_count):
 
 def identify_auxiliary_verbs(current_sentence, adjustment_count):
     """
-    This function identifies auxiliary verbs as they are not explicitly tagged with FreeLing
+    This function identifies auxiliary verbs as they are not explicitly tagged with spaCy
     This rule-based function is made accordingly with https://en.wikipedia.org/wiki/Auxiliary_verb#List_of_auxiliaries_in_English
     We cover most of the auxiliary verbs, but this is part of an incremental work and can be adapted.
 
@@ -502,7 +502,7 @@ def identify_auxiliary_verbs(current_sentence, adjustment_count):
         if (current_tag.lemma == "be" or current_tag.lemma == "can" or current_tag.lemma == "have" or current_tag.lemma == "may" or current_tag.lemma == "must" 
                 or current_tag.lemma == "should" or current_tag.lemma == "will") and (current_tag.tag == UniversalPOS.VERB_TAG 
                 and (idx < len(current_sentence) - 1) and current_sentence[idx + 1].tag == UniversalPOS.VERB_TAG):
-            adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.AUX_VERB_TAG, current_tag.certainty)
+            adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.AUX_TAG)
             adjustment_count += 1
             
         # "Do" (do-support/emphasis) E.g.: You did not understand.
@@ -516,7 +516,7 @@ def identify_auxiliary_verbs(current_sentence, adjustment_count):
         elif (current_tag.lemma == "do" or current_tag.lemma == "may" or current_tag.lemma == "must" or current_tag.lemma == "need" or current_tag.lemma == "shall"
                 or current_tag.lemma == "would") and (current_tag.tag == UniversalPOS.VERB_TAG 
                 and (idx < len(current_sentence) - 2) and current_sentence[idx + 2].tag == UniversalPOS.VERB_TAG):
-            adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.AUX_VERB_TAG, current_tag.certainty)
+            adjusted_tag = Tag(current_tag.original, current_tag.lemma, UniversalPOS.AUX_TAG)
             adjustment_count += 1
         
         adjusted_sentence.append(adjusted_tag)

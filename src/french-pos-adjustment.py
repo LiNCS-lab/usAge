@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-The :mod:`src.french-pos-adjustment` implements a french FreeLing POS tag adjustment task.
-It is used to modify some tags that might have been wrongfully tagged by FreeLing 
+The :mod:`src.french-pos-adjustment` implements a french POS tag adjustment task.
+It is used to modify some tags that might have been wrongfully tagged by spaCy 
 or to arrange some tags as desired for a specific context.
 
 This is an incremental process which can be modified as desired.
@@ -28,13 +28,13 @@ import os
 import sys
 import re
 
-from utils.corpus_util import extract_freeling_tags, obtain_corpus_classes, extract_participant_info
+from utils.corpus_util import extract_tags, obtain_corpus_classes, extract_participant_info
 from utils.data_util import save_tags_in_file
 from utils.pickle_util import read_pickle
 from utils.nlp_util import Tag, UniversalPOS
 
 # CONSTANTS
-ADJUSTED_DIALOG_OUTPUT_PATH = "out/TaggedDialogsAdjusted/PAR/"
+ADJUSTED_DIALOG_OUTPUT_PATH = "out/TaggedDialogsAdjusted/"
 
 def main():
     args = parse_args()
@@ -60,7 +60,7 @@ def main():
 def parse_args():
     parser = argparse.ArgumentParser(description='Multilingual pos distribution calculator.')
     parser.add_argument(dest='corpus_path', 
-                    help='path to the folder containing all transcripts tagged by FreeLing')
+                    help='path to the folder containing all transcripts with POS tags')
     parser.add_argument('-v', '--verbose', dest='is_verbose', default=False, action='store_true',
                     help='print processing info')
     return parser.parse_args()
@@ -91,9 +91,9 @@ def process_corpus(corpus_path, is_verbose=False):
 
             participant_info = extract_participant_info(file_name)
 
-            freeling_tags = extract_freeling_tags(os.path.join(corpus_path, file_name))
+            tags = extract_tags(os.path.join(corpus_path, file_name))
 
-            adjusted_dialog_tags, dialog_adjustment_count = adjust_pos_tags(freeling_tags, is_verbose=is_verbose)
+            adjusted_dialog_tags, dialog_adjustment_count = adjust_pos_tags(tags, is_verbose=is_verbose)
 
             export_file_path = ADJUSTED_DIALOG_OUTPUT_PATH + file_name
             save_tags_in_file(adjusted_dialog_tags, export_file_path)
@@ -104,7 +104,7 @@ def process_corpus(corpus_path, is_verbose=False):
 
 def adjust_pos_tags(pos_tags, is_verbose=False):
     """
-    This function adjust POS tags made by FreeLing.
+    This function adjust POS tags made by spaCy.
 
     Parameters
     ----------
@@ -136,7 +136,7 @@ def adjust_pos_tags(pos_tags, is_verbose=False):
                 adjustment_count += 1
                 pos_tags.remove(previous_tag)
             
-            # For a pattern like "sommes --> sommer" précédé par "nous" (Error made by FreeLing 4.0)
+            # For a pattern like "sommes --> sommer" précédé par "nous"
             elif current_tag.original.lower() == "sommes" and current_tag.lemma.lower() == "sommer" and previous_tag.original.lower() == "nous":
                 current_tag.lemma = "être"
                 current_tag.tag = "ADP"

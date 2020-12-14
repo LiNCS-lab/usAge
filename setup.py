@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="multilingual-text-normalizer",
+    name="usAge",
     version="0.0.1",
     author="Frederic Abiven",
     author_email="fredericabiveninfo@gmail.com",
-    description="A tool for multilingual text normalization.",
+    description="A tool for multilingual text normalization and linguistic/phonetic feature extraction.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="",

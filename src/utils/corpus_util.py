@@ -51,14 +51,14 @@ def extract_transcript_lines(file_path, is_chat_file=True):
     return lines
 
 # This function extracts lines of transcripts as sentences. This method is dependant on the transcript format.
-def extract_freeling_tags(file_path):
+def extract_tags(file_path):
     tags = []
 
     file = open(file_path, 'r')
     for line in file:
-        if len(line.split(' ')) == 4: # 
+        if len(line.split(' ')) == 3: # 
             tag = line.split(' ')
-            tags.append(Tag(tag[0], tag[1], tag[2], tag[3]))
+            tags.append(Tag(tag[0], tag[1], tag[2].strip().replace("\n", "")))
         else:
             tags.append("\n")
         

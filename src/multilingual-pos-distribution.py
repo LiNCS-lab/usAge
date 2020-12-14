@@ -31,21 +31,18 @@ from collections import defaultdict
 
 import pandas as pd
 
-from utils.corpus_util import extract_freeling_tags, obtain_corpus_classes, extract_participant_info
+from utils.corpus_util import extract_tags, obtain_corpus_classes, extract_participant_info
 from utils.data_util import export_dataframe
 from utils.pickle_util import read_pickle
 from utils.nlp_util import UniversalPOS, Tag
 
 # CONSTANTS
 POS_DISTRIBUTION_FEATURES_PATH = "out/ExtractedFeatures/pos_distribution.csv"
-POS_DISTRIBUTION_MEASURES_DICT = { UniversalPOS.ADJ_TAG: ["adjFreq", "adjRatio"], UniversalPOS.CONJ_TAG: ["conjFreq", "conjRatio"], 
-                                   UniversalPOS.NOUN_TAG: ["nounFreq", "nounRatio"], UniversalPOS.ADP_TAG: ["adpFreq", "adpRatio"],
-                                   UniversalPOS.VERB_TAG: ["verbFreq", "verbRatio"], UniversalPOS.AUX_VERB_TAG: ["aux_verbFreq", "aux_verbRatio"] }
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Multilingual pos distribution calculator.')
     parser.add_argument(dest='corpus_path',
-                    help='path to the folder containing all transcripts tagged by FreeLing')
+                    help='path to the folder containing all transcripts with POS tags')
     parser.add_argument('-f', '--features_output_path', dest='features_output_path',
                     help='path to folder where normalizing features will be stored (.csv file)')
     parser.add_argument('-v', '--verbose', dest='is_verbose', default=False, action='store_true',
@@ -106,13 +103,13 @@ def process_corpus(corpus_path, is_verbose=False):
             
             participant_info = extract_participant_info(file_name)
 
-            freeling_tags = extract_freeling_tags(os.path.join(corpus_path, file_name))
+            tags = extract_tags(os.path.join(corpus_path, file_name))
 
-            pos_distribution, total_word_count = calculate_pos_frequency(freeling_tags, is_verbose=is_verbose)
+            pos_distribution, total_word_count = calculate_pos_frequency(tags, is_verbose=is_verbose)
 
             results["idParticipant"] = participant_info["idParticipant"]
             results["interviewNumber"] = participant_info["interviewNumber"]
-            for measure in POS_DISTRIBUTION_MEASURES_DICT:
+            for measure in UniversalPOS.UNIVERSAL_TAGSET:
                 freq_idx = measure.lower() + "Freq"
                 ratio_idx = measure.lower() + "Ratio"
                 results[freq_idx] = pos_distribution[measure]
@@ -126,7 +123,7 @@ def process_corpus(corpus_path, is_verbose=False):
 
 def calculate_pos_frequency(pos_tags, is_verbose=False):
     """
-    This function calculates the distribution of the POS tags based on FreeLing tagset (frequency).
+    This function calculates the distribution of the UNIVERSAL POS tags (frequency).
     For better results, make sure the tags have been universalized before.
 
     Parameters
@@ -147,9 +144,9 @@ def calculate_pos_frequency(pos_tags, is_verbose=False):
     for pos_tag in pos_tags:
         if type(pos_tag) is Tag:
             if pos_tag.tag:
-                if pos_tag.tag != UniversalPOS.PONCTUATION_TAG:
+                if pos_tag.tag != UniversalPOS.PUNCT_TAG:
                     total_word_count += 1
-                if pos_tag.tag in POS_DISTRIBUTION_MEASURES_DICT:
+                if pos_tag.tag in UniversalPOS.UNIVERSAL_TAGSET:
                     pos_distribution[pos_tag.tag] += 1
 
     total_word_count += missed_tag_count
@@ -157,9 +154,9 @@ def calculate_pos_frequency(pos_tags, is_verbose=False):
 
 def print_results(results):
     print("")
-    print("POS DISTRIBUTION RESULTS")
+    print("POS DISTRIBUTION RESULTS (Average per transcription)")
     print("------------------------")
-    print(results[[x for x in results if x.endswith('Freq')]].sum())
+    print(results[[x for x in results if x.endswith('Freq')]].mean())
     
 if __name__ == "__main__":
     main()

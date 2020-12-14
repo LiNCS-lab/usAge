@@ -41,14 +41,14 @@ from collections import Counter
 import pandas as pd
 from spellchecker import SpellChecker
 
-from utils.corpus_util import (extract_freeling_tags, extract_participant_info,
+from utils.corpus_util import (extract_tags, extract_participant_info,
                                obtain_corpus_classes)
 from utils.data_util import export_dataframe
 from utils.nlp_util import Tag
 from utils.pickle_util import read_pickle
 
 # Constants
-DIALOG_INFO_PATH = "out/DialogsInfo/PAR/"
+DIALOG_INFO_PATH = "out/DialogsInfo/"
 LINGUISTIC_FEATURES_EXPORT_PATH = "out/ExtractedFeatures/linguistic_features.csv"
 LINGUISTIC_FEATURES = ["idParticipant", "interviewNumber", "text_size", "vocab_size", "hapax_legomena", "hapax_dislegomena", 
                 "brunet_index", "honore_r_statistics", "ttr", "sichel_s", "yule_k", "entropy", "status"]
@@ -57,7 +57,7 @@ LINGUISTIC_FEATURES = ["idParticipant", "interviewNumber", "text_size", "vocab_s
 spell = SpellChecker()
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Multilingual pos distribution calculator.')
+    parser = argparse.ArgumentParser(description='Multilingual linguistic feature calculator.')
     parser.add_argument(dest='corpus_path',
                     help='path to the folder containing all normalized transcripts')
     parser.add_argument('-f', '--features_output_path', dest='features_output_path',
@@ -120,7 +120,7 @@ def process_corpus(corpus_path, is_verbose=False):
 
             file_path = corpus_path + "/" + file_name
 
-            cleaned_tags = extract_freeling_tags(file_path)
+            cleaned_tags = extract_tags(file_path)
 
             linguistics_matrix.append((participant_info["idParticipant"],) 
                                         + (participant_info["interviewNumber"],)
@@ -215,7 +215,7 @@ def estimate_linguistics(cleaned_tags):
     
 def print_results(results):
     print("")
-    print("LINGUISTIC MEASURES RESULTS (Avg.)")
+    print("LINGUISTIC MEASURES RESULTS (Average per transcription)")
     print("------------------------")
     print(results.drop('idParticipant', 1).drop('interviewNumber', 1).drop('status', 1).mean())
 

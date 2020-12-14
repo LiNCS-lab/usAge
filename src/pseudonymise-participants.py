@@ -30,7 +30,7 @@ import re
 from utils.corpus_util import (extract_participant_info,
                                extract_transcript_lines)
 
-PSEUDONYMISED_DIALOGS_INFO_PATH = 'out/PseudonymisedInfo/PAR/'
+PSEUDONYMISED_DIALOGS_INFO_PATH = 'out/PseudonymisedInfo/'
 SECRET_KEY_PATH = 'out/secret.key'
 
 def parse_args():

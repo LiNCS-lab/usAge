@@ -312,7 +312,7 @@ def clean_transcription(transcription, syn_conf_file=None, interjection_conf_fil
 
 def print_results(results):
     print("")
-    print("CLEANING RESULTS (Avg. per transcription)")
+    print("CLEANING RESULTS (Average per transcription)")
     print("------------------------")
     print(results[[x for x in results if not x.endswith("Ratio")]].drop(
         'idParticipant', 1).drop('interviewNumber', 1).drop('status', 1).mean())

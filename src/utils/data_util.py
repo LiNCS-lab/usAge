@@ -19,7 +19,7 @@ def save_tags_in_file(tags, file_path):
     with open(file_path, "w+") as f:
         for tag in tags:
             if type(tag) is Tag:
-                f.write(tag.original + " " + tag.lemma + " " + tag.tag + " " + tag.certainty)
+                f.write(tag.original + " " + tag.lemma + " " + tag.tag + "\n")
             else:
                 f.write(os.linesep)
         f.close()
